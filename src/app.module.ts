@@ -9,7 +9,8 @@ import { PostModule } from './post/post.module';
 import { UserService } from './user/user.service';
 import { User, UserSchema } from './schemas/user.schema';
 import { AuthController } from './auth/auth.controller';
-import { AuthService } from './auth/auth.service';
+// import { AuthService } from './auth/auth.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -21,8 +22,9 @@ import { AuthService } from './auth/auth.service';
     ]),
     UserModule,
     PostModule,
+    AuthModule,
   ],
   controllers: [AppController, UserController, PostController, AuthController],
-  providers: [AppService, UserService, AuthService],
+  providers: [AppService, UserService],
 })
 export class AppModule {}
