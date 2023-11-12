@@ -3,7 +3,6 @@ import { User } from 'src/schemas/user.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { SignupDTO } from 'src/auth/authValidation/auth.validation';
-import { log } from 'console';
 
 @Injectable()
 export class UserService {
@@ -19,7 +18,11 @@ export class UserService {
     return this.userModel.findOne({ email });
   }
   async createUser(user: SignupDTO): Promise<User | null> {
-    log(user);
-    return await this.userModel.create({ user });
+    return await this.userModel.create({
+      ...user,
+    });
+  }
+  async deleteUser(user: User): Promise<User | null> {
+    return await this.userModel.findByIdAndDelete(user['_id']);
   }
 }

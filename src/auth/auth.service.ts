@@ -1,7 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { User } from 'src/schemas/user.schema';
-import { SignupDTO } from './authValidation/auth.validation';
-import { hashSync } from 'bcryptjs';
+import { SigninDTO, SignupDTO } from './authValidation/auth.validation';
+import { hashSync, compareSync } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 @Injectable()
@@ -11,7 +10,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signUp(body: SignupDTO): Promise<User | undefined> {
+  async signUp(body: SignupDTO): Promise<object | undefined> {
     const { rePassword, password, email } = body;
     if (rePassword !== password) {
       throw new BadRequestException('password and confirm password not match');
@@ -20,14 +19,30 @@ export class AuthService {
     if (existEmail) {
       throw new BadRequestException('Email Already Exist, Plz Log-In');
     }
-    // log(body);
     const saltOrRounds = 10;
     const hash = await hashSync(password, saltOrRounds);
-    // log(hash);
     body.password = hash;
     const user = await this.userService.createUser(body);
-    // const payload = { email: user.email };
-    // const token = await this.jwtService.signAsync(payload);
-    return user;
+    const payload = { email: user.email };
+    const token = await this.jwtService.signAsync(payload);
+    return { token };
+  }
+
+  async signin(body: SigninDTO): Promise<object | undefined> {
+    const existUser = await this.userService.findByEmail(body.email);
+    const result = await compareSync(body.password, existUser.password);
+    if (result) {
+      const payload = { email: existUser.email };
+      const token = await this.jwtService.signAsync(payload);
+      return { token };
+    } else {
+      throw new BadRequestException('Incorrect Password');
+    }
+  }
+  async deleteAccount(req: string): Promise<object | undefined> {
+    const user = await this.userService.deleteUser(req['user']);
+    console.log(user);
+
+    return { message: req['user'] };
   }
 }

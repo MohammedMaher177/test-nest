@@ -25,3 +25,9 @@ export class SignupDTO {
   @Min(7)
   age: number;
 }
+export class SigninDTO {
+  @IsNotEmpty()
+  email: string;
+  @IsNotEmpty()
+  password: string;
+}
